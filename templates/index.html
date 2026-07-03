@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ title }}</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <main class="card">
+    <h1>{{ title }}</h1>
+    <p>FastAPI + Jinja2 พร้อมใช้งานแล้ว 🎉</p>
+
+    <section>
+      <h2>ทดสอบเรียก API</h2>
+      <form id="echo-form">
+        <input type="text" id="message" placeholder="พิมพ์ข้อความ..." required>
+        <button type="submit">ส่ง</button>
+      </form>
+      <pre id="result">ผลลัพธ์จะแสดงตรงนี้</pre>
+    </section>
+
+    <footer>
+      <a href="/docs" target="_blank">เปิด API Docs (Swagger UI)</a>
+    </footer>
+  </main>
+
+  <script>
+    document.getElementById("echo-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const message = document.getElementById("message").value;
+      const res = await fetch("/api/echo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message }),
+      });
+      const data = await res.json();
+      document.getElementById("result").textContent = JSON.stringify(data, null, 2);
+    });
+  </script>
+</body>
+</html>
