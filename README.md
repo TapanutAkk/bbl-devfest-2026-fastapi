@@ -1,10 +1,11 @@
 # BBL Dev Fest 2026
 
-FastAPI + Jinja2 frontend, จัดการด้วย [uv](https://docs.astral.sh/uv/)
+FastAPI + Jinja2 frontend + SQLite (SQLModel), จัดการด้วย [uv](https://docs.astral.sh/uv/)
 
 ## วิธีรัน
 
 ```bash
+cp .env.example .env   # ครั้งแรกครั้งเดียว
 uv run uvicorn main:app --reload
 ```
 

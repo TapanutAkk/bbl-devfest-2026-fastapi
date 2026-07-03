@@ -27,4 +27,8 @@ Everything lives in `main.py` — a single FastAPI app with two kinds of routes:
 - **Frontend**: `GET /` renders `templates/index.html` (Jinja2), which loads `static/style.css` and calls the API with inline fetch JS. Static files are mounted at `/static`.
 - **API**: JSON endpoints under `/api/*` (`/api/health`, `/api/echo`), request bodies validated with Pydantic models. Swagger UI is auto-served at `/docs`.
 
+Configuration comes from `.env` via a pydantic-settings `Settings` class in `main.py` (`.env` is gitignored; `.env.example` documents the expected keys — keep it in sync when adding settings). Settings load once at import, so `--reload` does not pick up `.env` edits — restart the server for those.
+
+**Database**: SQLite via SQLModel (`DATABASE_URL` in `.env`). Models are SQLModel classes with `table=True`; tables are created at startup by the lifespan hook (`create_all` — no migrations, so schema changes to an existing `data.db` require deleting the file or adding Alembic). Endpoints get a session through the `SessionDep` dependency. The `data.db` file is gitignored. See the `Item` CRUD under `/api/items` as the pattern to copy.
+
 When adding features, follow this split: page routes render templates, data routes go under `/api/` with Pydantic schemas. Split `main.py` into routers only if it grows large.
