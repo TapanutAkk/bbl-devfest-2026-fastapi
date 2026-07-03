@@ -2,7 +2,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Annotated
 
-from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -59,11 +59,64 @@ templates = Jinja2Templates(directory=BASE_DIR / "templates")
 
 # ---------- Frontend ----------
 
+def render_page(request: Request, page: str, context: dict | None = None):
+    """Render a partial for htmx requests, the full page otherwise.
+
+    History restores (HX-History-Restore-Request) need the full page even
+    though htmx sends them.
+    """
+    context = {"title": settings.app_name, "page": page, **(context or {})}
+    is_htmx = request.headers.get("HX-Request") and not request.headers.get(
+        "HX-History-Restore-Request"
+    )
+    template = f"partials/{page}.html" if is_htmx else "index.html"
+    return templates.TemplateResponse(request, template, context)
+
+
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
+    return render_page(request, "echo")
+
+
+@app.get("/items", response_class=HTMLResponse)
+def items_page(request: Request, session: SessionDep):
+    items = session.exec(select(Item)).all()
+    return render_page(request, "items", {"items": items})
+
+
+@app.post("/echo", response_class=HTMLResponse)
+async def echo_fragment(request: Request, message: Annotated[str, Form()]):
     return templates.TemplateResponse(
-        request, "index.html", {"title": settings.app_name}
+        request, "partials/echo_result.html", {"message": message}
     )
+
+
+def item_list_fragment(request: Request, session: Session):
+    items = session.exec(select(Item)).all()
+    return templates.TemplateResponse(
+        request, "partials/item_list.html", {"items": items}
+    )
+
+
+@app.post("/items", response_class=HTMLResponse)
+def create_item_fragment(
+    request: Request,
+    session: SessionDep,
+    name: Annotated[str, Form()],
+    description: Annotated[str | None, Form()] = None,
+):
+    session.add(Item(name=name, description=description or None))
+    session.commit()
+    return item_list_fragment(request, session)
+
+
+@app.delete("/items/{item_id}", response_class=HTMLResponse)
+def delete_item_fragment(request: Request, item_id: int, session: SessionDep):
+    item = session.get(Item, item_id)
+    if item is not None:
+        session.delete(item)
+        session.commit()
+    return item_list_fragment(request, session)
 
 
 # ---------- API ----------

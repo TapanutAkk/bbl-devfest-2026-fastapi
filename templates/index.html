@@ -1,24 +1,29 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{ title }}</title>
   <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/htmx.min.js"></script>
 </head>
+
 <body>
   <main class="card">
-    <h1>{{ title }}</h1>
-    <p>FastAPI + Jinja2 พร้อมใช้งานแล้ว 🎉</p>
+    <h1>{{ title }} Jack</h1>
+    <p>FastAPI + Jinja2 + HTMX พร้อมใช้งานแล้ว 🎉</p>
 
-    <section>
-      <h2>ทดสอบเรียก API</h2>
-      <form id="echo-form">
-        <input type="text" id="message" placeholder="พิมพ์ข้อความ..." required>
-        <button type="submit">ส่ง</button>
-      </form>
-      <pre id="result">ผลลัพธ์จะแสดงตรงนี้</pre>
-    </section>
+    <nav>
+      <a href="/" hx-get="/" hx-target="#content" hx-push-url="true"
+        class="{{ 'active' if page == 'echo' else '' }}">Echo</a>
+      <a href="/items" hx-get="/items" hx-target="#content" hx-push-url="true"
+        class="{{ 'active' if page == 'items' else '' }}">Items</a>
+    </nav>
+
+    <div id="content">
+      {% include "partials/" ~ page ~ ".html" %}
+    </div>
 
     <footer>
       <a href="/docs" target="_blank">เปิด API Docs (Swagger UI)</a>
@@ -26,17 +31,15 @@
   </main>
 
   <script>
-    document.getElementById("echo-form").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const message = document.getElementById("message").value;
-      const res = await fetch("/api/echo", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message }),
+    function syncNav() {
+      document.querySelectorAll("nav a").forEach((a) => {
+        a.classList.toggle("active", a.getAttribute("href") === location.pathname);
       });
-      const data = await res.json();
-      document.getElementById("result").textContent = JSON.stringify(data, null, 2);
-    });
+    }
+    ["htmx:pushedIntoHistory", "htmx:historyRestore", "popstate"].forEach((ev) =>
+      window.addEventListener(ev, syncNav)
+    );
   </script>
 </body>
+
 </html>

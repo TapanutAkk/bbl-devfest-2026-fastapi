@@ -1,0 +1,15 @@
+<ul id="item-list" class="item-list">
+  {% for item in items %}
+  <li>
+    <div>
+      <strong>{{ item.name }}</strong>
+      {% if item.description %}<small>{{ item.description }}</small>{% endif %}
+    </div>
+    <button class="danger" hx-delete="/items/{{ item.id }}"
+            hx-target="#item-list" hx-swap="outerHTML"
+            hx-confirm="ลบ '{{ item.name }}' ?">ลบ</button>
+  </li>
+  {% else %}
+  <li class="empty">ยังไม่มี item</li>
+  {% endfor %}
+</ul>

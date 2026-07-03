@@ -29,6 +29,36 @@ h1 {
   margin-bottom: 0.5rem;
 }
 
+nav {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+  border-bottom: 1px solid #e4e7eb;
+  padding-bottom: 0.5rem;
+}
+
+nav a {
+  padding: 0.35rem 0.9rem;
+  border-radius: 8px;
+  text-decoration: none;
+  color: #52606d;
+  font-size: 0.9rem;
+}
+
+nav a:hover {
+  background: #f4f6f8;
+}
+
+nav a.active {
+  background: #1a56db;
+  color: #fff;
+}
+
+#content.htmx-request {
+  opacity: 0.5;
+  transition: opacity 0.15s;
+}
+
 section {
   margin-top: 1.5rem;
 }
@@ -73,6 +103,46 @@ pre {
   font-size: 0.875rem;
   min-height: 3rem;
   white-space: pre-wrap;
+}
+
+.item-list {
+  list-style: none;
+  margin-top: 0.75rem;
+}
+
+.item-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.6rem 0.25rem;
+  border-bottom: 1px solid #e4e7eb;
+}
+
+.item-list li:last-child {
+  border-bottom: none;
+}
+
+.item-list small {
+  display: block;
+  color: #7b8794;
+}
+
+.item-list .empty {
+  color: #7b8794;
+  justify-content: center;
+}
+
+button.danger {
+  background: #fff;
+  color: #d64545;
+  border: 1px solid #f0b4b4;
+  padding: 0.3rem 0.75rem;
+  font-size: 0.85rem;
+}
+
+button.danger:hover {
+  background: #fdf2f2;
 }
 
 footer {
