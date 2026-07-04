@@ -45,10 +45,14 @@ A single FastAPI app split into modules:
 - `routers/web.py` — frontend router: Jinja2 pages + htmx fragments (login, bookings). `render_page` returns a partial for htmx requests, the full `index.html` otherwise.
 - `routers/api.py` — JSON router with prefix `/api` (health, echo, items CRUD, login/logout/me, bookings). Request bodies validated with Pydantic models; Swagger UI is auto-served at `/docs`.
 
-**Authorization rule**: admins see/delete all bookings; regular users only their own — enforced via `visible_bookings` and ownership checks, in both routers.
+**Authorization rule**: admins see/edit/delete all bookings; regular users only their own — enforced via `visible_bookings` and ownership checks, in both routers.
 
 Configuration comes from `.env` via a pydantic-settings `Settings` class in `config.py` (`.env` is gitignored; `.env.example` documents the expected keys — keep it in sync when adding settings). Settings load once at import, so `--reload` does not pick up `.env` edits — restart the server for those.
 
 **Database**: SQLite via SQLModel (`DATABASE_URL` in `.env`). Models are SQLModel classes with `table=True`; tables are created at startup by the lifespan hook (`create_all` — no migrations, so schema changes to an existing `data.db` require deleting the file or adding Alembic). Endpoints get a session through the `SessionDep` dependency. The `data.db` file is gitignored. See the `Item` CRUD under `/api/items` as the pattern to copy.
+
+**Seed data**: `SEED_USERS` and `SEED_BOOKINGS` in `main.py`, inserted by the lifespan hook only when the user table is empty. To re-seed, delete `data.db` and restart the server. Login credentials for manual testing: `admin/admin123` (admin), `alice/alice123`, `bob/bob123`.
+
+**Tests**: `tests/conftest.py` points `DATABASE_URL` at a throwaway temp file *before* importing `main` (settings load once at import), so tests never touch `data.db`. The `client` fixture wipes bookings before each test.
 
 When adding features, follow this split: page routes and htmx fragments go in `routers/web.py`, data routes go in `routers/api.py` under `/api/` with Pydantic schemas.

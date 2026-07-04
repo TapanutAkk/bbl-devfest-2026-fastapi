@@ -2,10 +2,15 @@
 
 FastAPI + Jinja2 frontend + SQLite (SQLModel), จัดการด้วย [uv](https://docs.astral.sh/uv/)
 
+## สิ่งที่ต้องมี
+
+- [uv](https://docs.astral.sh/uv/) — ติดตั้งด้วย `curl -LsSf https://astral.sh/uv/install.sh | sh` (uv จะจัดการ Python 3.12 และ virtual environment ให้เองทั้งหมด)
+
 ## วิธีรัน
 
 ```bash
 cp .env.example .env   # ครั้งแรกครั้งเดียว
+uv sync                # ติดตั้ง dependencies (ครั้งแรกครั้งเดียว)
 uv run uvicorn main:app --reload
 ```
 
@@ -16,15 +21,17 @@ uv run uvicorn main:app --reload
 
 ## ระบบจองคิวนัดหมาย (Appointment Booking)
 
-Login ที่หน้า `/login` แล้วจองช่วงเวลา (เช่น `10am-11am`) ที่หน้า `/bookings`
+Login ที่หน้า `/login` แล้วจองที่หน้า `/bookings` — เลือกเวลาเริ่มต้น/สิ้นสุดด้วย time picker และแก้ไขหรือลบการจองได้จากรายการ (ใน DB เก็บช่วงเวลาเป็น string เช่น `10:00-11:00`)
 
-ผู้ใช้ทดลอง (seed อัตโนมัติตอนรันครั้งแรก):
+ผู้ใช้ทดลอง (seed อัตโนมัติตอนรันครั้งแรก พร้อมการจองตัวอย่าง 3 รายการ):
 
 | username | password | สิทธิ์ |
 |---|---|---|
-| `admin` | `admin123` | แอดมิน — เห็นและลบการจองของทุกคน |
+| `admin` | `admin123` | แอดมิน — เห็น แก้ไข และลบการจองของทุกคน |
 | `alice` | `alice123` | ผู้ใช้ทั่วไป — จัดการเฉพาะการจองของตัวเอง |
 | `bob` | `bob123` | ผู้ใช้ทั่วไป — จัดการเฉพาะการจองของตัวเอง |
+
+รีเซ็ต database กลับเป็นข้อมูลเริ่มต้น: ลบไฟล์ `data.db` แล้วรีสตาร์ท server
 
 ### REST API
 
