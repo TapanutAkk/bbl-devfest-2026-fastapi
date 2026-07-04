@@ -38,7 +38,7 @@ def test_login_unknown_user_rejected(client):
 def test_bookings_require_login(client):
     assert client.get("/api/bookings").status_code == 401
     assert (
-        client.post("/api/bookings", json={"time_slot": "10am-11am"}).status_code
+        client.post("/api/bookings", json={"time_slot": "10.00-11.00"}).status_code
         == 401
     )
     assert client.delete("/api/bookings/1").status_code == 401
@@ -50,15 +50,15 @@ def test_user_sees_only_own_bookings(client):
     alice = login(client, "alice", "alice123")
     bob = login(client, "bob", "bob123")
 
-    client.post("/api/bookings", json={"time_slot": "10am-11am"}, headers=alice)
-    client.post("/api/bookings", json={"time_slot": "1pm-2pm"}, headers=bob)
+    client.post("/api/bookings", json={"time_slot": "10.00-11.00"}, headers=alice)
+    client.post("/api/bookings", json={"time_slot": "13.00-14.00"}, headers=bob)
 
     res = client.get("/api/bookings", headers=alice)
     assert res.status_code == 200
     bookings = res.json()
     assert len(bookings) == 1
     assert bookings[0]["username"] == "alice"
-    assert bookings[0]["time_slot"] == "10am-11am"
+    assert bookings[0]["time_slot"] == "10.00-11.00"
 
 
 def test_admin_sees_all_bookings(client):
@@ -66,8 +66,8 @@ def test_admin_sees_all_bookings(client):
     bob = login(client, "bob", "bob123")
     admin = login(client, "admin", "admin123")
 
-    client.post("/api/bookings", json={"time_slot": "10am-11am"}, headers=alice)
-    client.post("/api/bookings", json={"time_slot": "1pm-2pm"}, headers=bob)
+    client.post("/api/bookings", json={"time_slot": "10.00-11.00"}, headers=alice)
+    client.post("/api/bookings", json={"time_slot": "13.00-14.00"}, headers=bob)
 
     res = client.get("/api/bookings", headers=admin)
     assert res.status_code == 200
@@ -79,7 +79,7 @@ def test_admin_sees_all_bookings(client):
 def test_user_can_delete_own_booking(client):
     alice = login(client, "alice", "alice123")
     booking = client.post(
-        "/api/bookings", json={"time_slot": "10am-11am"}, headers=alice
+        "/api/bookings", json={"time_slot": "10.00-11.00"}, headers=alice
     ).json()
 
     res = client.delete(f"/api/bookings/{booking['id']}", headers=alice)
@@ -91,7 +91,7 @@ def test_user_cannot_delete_others_booking(client):
     alice = login(client, "alice", "alice123")
     bob = login(client, "bob", "bob123")
     booking = client.post(
-        "/api/bookings", json={"time_slot": "10am-11am"}, headers=alice
+        "/api/bookings", json={"time_slot": "10.00-11.00"}, headers=alice
     ).json()
 
     res = client.delete(f"/api/bookings/{booking['id']}", headers=bob)
@@ -103,7 +103,7 @@ def test_admin_can_delete_any_booking(client):
     alice = login(client, "alice", "alice123")
     admin = login(client, "admin", "admin123")
     booking = client.post(
-        "/api/bookings", json={"time_slot": "10am-11am"}, headers=alice
+        "/api/bookings", json={"time_slot": "10.00-11.00"}, headers=alice
     ).json()
 
     res = client.delete(f"/api/bookings/{booking['id']}", headers=admin)
