@@ -18,7 +18,7 @@ uv sync                            # install deps from lockfile
 
 If `uv` is not on PATH, it lives at `~/.local/bin/uv`.
 
-There are no tests or linters configured yet. If you add tests, use pytest via `uv add --dev pytest` and run with `uv run pytest`.
+Tests live in `tests/` (pytest + TestClient); run with `uv run pytest`. No linters are configured.
 
 ## Commits
 
@@ -36,13 +36,19 @@ Types:
 
 ## Architecture
 
-Everything lives in `main.py` — a single FastAPI app with two kinds of routes:
+A single FastAPI app split into modules:
 
-- **Frontend**: `GET /` renders `templates/index.html` (Jinja2), which loads `static/style.css` and calls the API with inline fetch JS. Static files are mounted at `/static`.
-- **API**: JSON endpoints under `/api/*` (`/api/health`, `/api/echo`), request bodies validated with Pydantic models. Swagger UI is auto-served at `/docs`.
+- `main.py` — app assembly only: lifespan (create_all + seed data), static mount, router includes. `uvicorn main:app` is the entrypoint.
+- `config.py` — pydantic-settings `Settings` + `BASE_DIR`.
+- `database.py` — SQLModel models (`Item`, `User`, `Booking`), engine, `SessionDep`, shared query helpers.
+- `auth.py` — PBKDF2 password hashing, in-memory session-token store (`auth_sessions`), `OptionalUser`/`CurrentUser` dependencies (token from Bearer header or `session_token` cookie).
+- `routers/web.py` — frontend router: Jinja2 pages + htmx fragments (login, bookings). `render_page` returns a partial for htmx requests, the full `index.html` otherwise.
+- `routers/api.py` — JSON router with prefix `/api` (health, echo, items CRUD, login/logout/me, bookings). Request bodies validated with Pydantic models; Swagger UI is auto-served at `/docs`.
 
-Configuration comes from `.env` via a pydantic-settings `Settings` class in `main.py` (`.env` is gitignored; `.env.example` documents the expected keys — keep it in sync when adding settings). Settings load once at import, so `--reload` does not pick up `.env` edits — restart the server for those.
+**Authorization rule**: admins see/delete all bookings; regular users only their own — enforced via `visible_bookings` and ownership checks, in both routers.
+
+Configuration comes from `.env` via a pydantic-settings `Settings` class in `config.py` (`.env` is gitignored; `.env.example` documents the expected keys — keep it in sync when adding settings). Settings load once at import, so `--reload` does not pick up `.env` edits — restart the server for those.
 
 **Database**: SQLite via SQLModel (`DATABASE_URL` in `.env`). Models are SQLModel classes with `table=True`; tables are created at startup by the lifespan hook (`create_all` — no migrations, so schema changes to an existing `data.db` require deleting the file or adding Alembic). Endpoints get a session through the `SessionDep` dependency. The `data.db` file is gitignored. See the `Item` CRUD under `/api/items` as the pattern to copy.
 
-When adding features, follow this split: page routes render templates, data routes go under `/api/` with Pydantic schemas. Split `main.py` into routers only if it grows large.
+When adding features, follow this split: page routes and htmx fragments go in `routers/web.py`, data routes go in `routers/api.py` under `/api/` with Pydantic schemas.

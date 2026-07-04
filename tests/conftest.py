@@ -9,7 +9,9 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import Session, delete
 
-from main import Booking, app, auth_sessions, engine
+from auth import auth_sessions
+from database import Booking, engine
+from main import app
 
 
 @pytest.fixture()
