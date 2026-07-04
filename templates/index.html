@@ -11,7 +11,7 @@
 
 <body>
   <main class="card">
-    <h1>{{ title }} Jack</h1>
+    <h1>{{ title }}</h1>
     <p>FastAPI + Jinja2 + HTMX พร้อมใช้งานแล้ว 🎉</p>
 
     {% if user %}
@@ -29,16 +29,7 @@
     </footer>
   </main>
 
-  <script>
-    function syncNav() {
-      document.querySelectorAll("nav a").forEach((a) => {
-        a.classList.toggle("active", a.getAttribute("href") === location.pathname);
-      });
-    }
-    ["htmx:pushedIntoHistory", "htmx:historyRestore", "popstate"].forEach((ev) =>
-      window.addEventListener(ev, syncNav)
-    );
-  </script>
+  <script src="/static/main.js"></script>
 </body>
 
 </html>
