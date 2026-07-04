@@ -18,6 +18,10 @@ router = APIRouter()
 templates = Jinja2Templates(directory=BASE_DIR / "templates")
 
 
+def partial(name: str) -> str:
+    return f"partials/{name}.html"
+
+
 def render_page(request: Request, page: str, context: dict | None = None):
     """Render a partial for htmx requests, the full page otherwise.
 
@@ -33,7 +37,7 @@ def render_page(request: Request, page: str, context: dict | None = None):
     is_htmx = request.headers.get("HX-Request") and not request.headers.get(
         "HX-History-Restore-Request"
     )
-    template = f"partials/{page}.html" if is_htmx else "index.html"
+    template = partial(page) if is_htmx else "index.html"
     return templates.TemplateResponse(request, template, context)
 
 
@@ -67,7 +71,7 @@ def login_fragment(
     if user is None or not verify_password(password, user.password_hash):
         return templates.TemplateResponse(
             request,
-            "partials/login.html",
+            partial("login"),
             {"error": "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง"},
         )
     token = create_session(user)
@@ -98,7 +102,7 @@ def booking_list_fragment(
 ):
     return templates.TemplateResponse(
         request,
-        "partials/booking_list.html",
+        partial("booking_list"),
         {"user": user, "bookings": visible_bookings(session, user), "error": error},
     )
 
