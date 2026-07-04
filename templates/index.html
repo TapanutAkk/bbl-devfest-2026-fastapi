@@ -14,12 +14,11 @@
     <h1>{{ title }} Jack</h1>
     <p>FastAPI + Jinja2 + HTMX พร้อมใช้งานแล้ว 🎉</p>
 
+    {% if user %}
     <nav>
-      <a href="/" hx-get="/" hx-target="#content" hx-push-url="true"
-        class="{{ 'active' if page == 'echo' else '' }}">Echo</a>
-      <a href="/items" hx-get="/items" hx-target="#content" hx-push-url="true"
-        class="{{ 'active' if page == 'items' else '' }}">Items</a>
+      <button class="nav-logout" hx-post="/logout" hx-confirm="ออกจากระบบ?">ออกจากระบบ ({{ user.username }})</button>
     </nav>
+    {% endif %}
 
     <div id="content">
       {% include "partials/" ~ page ~ ".html" %}

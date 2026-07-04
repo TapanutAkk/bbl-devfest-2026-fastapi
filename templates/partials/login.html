@@ -1,0 +1,10 @@
+<section>
+  <h2>เข้าสู่ระบบ</h2>
+  <form hx-post="/login" hx-target="#content" class="stack">
+    <input type="text" name="username" placeholder="ชื่อผู้ใช้" required>
+    <input type="password" name="password" placeholder="รหัสผ่าน" required>
+    <button type="submit">เข้าสู่ระบบ</button>
+  </form>
+  {% if error %}<p class="error">{{ error }}</p>{% endif %}
+  <p class="hint">ผู้ใช้ทดลอง: admin / admin123 (แอดมิน), alice / alice123, bob / bob123</p>
+</section>

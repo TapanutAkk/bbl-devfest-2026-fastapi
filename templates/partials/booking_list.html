@@ -1,0 +1,18 @@
+<div id="booking-list">
+  {% if error %}<p class="error">{{ error }}</p>{% endif %}
+  <ul class="item-list">
+    {% for booking in bookings %}
+    <li>
+      <div>
+        <strong>{{ booking.time_slot }}</strong>
+        {% if user.is_admin %}<small>โดย {{ booking.username }}</small>{% endif %}
+      </div>
+      <button class="danger" hx-delete="/bookings/{{ booking.id }}"
+              hx-target="#booking-list" hx-swap="outerHTML"
+              hx-confirm="ยกเลิกการจอง '{{ booking.time_slot }}' ?">ยกเลิก</button>
+    </li>
+    {% else %}
+    <li class="empty">ยังไม่มีการจอง</li>
+    {% endfor %}
+  </ul>
+</div>

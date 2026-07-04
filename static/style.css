@@ -54,6 +54,43 @@ nav a.active {
   color: #fff;
 }
 
+nav .nav-logout {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: #52606d;
+  font-size: 0.9rem;
+  padding: 0.35rem 0.9rem;
+  border-radius: 8px;
+}
+
+nav .nav-logout:hover {
+  background: #fdf2f2;
+  color: #d64545;
+}
+
+form.stack {
+  flex-direction: column;
+}
+
+form .sep {
+  align-self: center;
+  color: #7b8794;
+  font-size: 0.85rem;
+}
+
+.error {
+  margin-top: 0.75rem;
+  color: #d64545;
+  font-size: 0.9rem;
+}
+
+.hint {
+  margin-top: 0.75rem;
+  color: #7b8794;
+  font-size: 0.85rem;
+}
+
 #content.htmx-request {
   opacity: 0.5;
   transition: opacity 0.15s;

@@ -1,0 +1,14 @@
+<section>
+  <h2>จองคิวนัดหมาย</h2>
+  <p class="hint">
+    ผู้ใช้: <strong>{{ user.username }}</strong>
+    {% if user.is_admin %}(แอดมิน — เห็นการจองของทุกคน){% else %}(เห็นเฉพาะการจองของตัวเอง){% endif %}
+  </p>
+  <form hx-post="/bookings" hx-target="#booking-list" hx-swap="outerHTML">
+    <input type="time" name="start_time" required>
+    <span class="sep">ถึง</span>
+    <input type="time" name="end_time" required>
+    <button type="submit">จอง</button>
+  </form>
+  {% include "partials/booking_list.html" %}
+</section>
