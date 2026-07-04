@@ -20,6 +20,20 @@ If `uv` is not on PATH, it lives at `~/.local/bin/uv`.
 
 There are no tests or linters configured yet. If you add tests, use pytest via `uv add --dev pytest` and run with `uv run pytest`.
 
+## Commits
+
+Use Conventional Commits: `<type>: <description>` — description in imperative mood, lowercase, no trailing period (e.g. `feat: add appointment booking with auth`).
+
+Types:
+
+- `feat:` — new feature or endpoint
+- `fix:` — bug fix
+- `refactor:` — code change that neither fixes a bug nor adds a feature
+- `test:` — add or update tests
+- `docs:` — documentation only (README, CLAUDE.md)
+- `style:` — CSS/template tweaks with no logic change
+- `chore:` — dependencies, config, tooling
+
 ## Architecture
 
 Everything lives in `main.py` — a single FastAPI app with two kinds of routes:
