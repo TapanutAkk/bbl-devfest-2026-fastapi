@@ -2,15 +2,33 @@
   {% if error %}<p class="error">{{ error }}</p>{% endif %}
   <ul class="item-list">
     {% for booking in bookings %}
+    {% if edit and edit.id == booking.id %}
+    <li>
+      <form hx-put="/bookings/{{ booking.id }}" hx-target="#booking-list"
+            hx-swap="outerHTML" class="edit-form">
+        <input type="time" name="start_time" value="{{ edit.start }}" required>
+        <span class="sep">ถึง</span>
+        <input type="time" name="end_time" value="{{ edit.end }}" required>
+        <button type="submit">บันทึก</button>
+        <button type="button" class="ghost" hx-get="/bookings/list"
+                hx-target="#booking-list" hx-swap="outerHTML">ยกเลิก</button>
+      </form>
+    </li>
+    {% else %}
     <li>
       <div>
         <strong>{{ booking.time_slot }}</strong>
         {% if user.is_admin %}<small>โดย {{ booking.username }}</small>{% endif %}
       </div>
-      <button class="danger" hx-delete="/bookings/{{ booking.id }}"
-              hx-target="#booking-list" hx-swap="outerHTML"
-              hx-confirm="ยกเลิกการจอง '{{ booking.time_slot }}' ?">ยกเลิก</button>
+      <div class="actions">
+        <button class="ghost" hx-get="/bookings/{{ booking.id }}/edit"
+                hx-target="#booking-list" hx-swap="outerHTML">แก้ไข</button>
+        <button class="danger" hx-delete="/bookings/{{ booking.id }}"
+                hx-target="#booking-list" hx-swap="outerHTML"
+                hx-confirm="ลบการจอง '{{ booking.time_slot }}' ?">ลบ</button>
+      </div>
     </li>
+    {% endif %}
     {% else %}
     <li class="empty">ยังไม่มีการจอง</li>
     {% endfor %}

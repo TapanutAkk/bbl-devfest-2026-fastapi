@@ -111,6 +111,56 @@ def test_admin_can_delete_any_booking(client):
     assert client.get("/api/bookings", headers=admin).json() == []
 
 
+def test_user_can_update_own_booking(client):
+    alice = login(client, "alice", "alice123")
+    booking = client.post(
+        "/api/bookings", json={"time_slot": "10.00-11.00"}, headers=alice
+    ).json()
+
+    res = client.put(
+        f"/api/bookings/{booking['id']}",
+        json={"time_slot": "15.00-16.00"},
+        headers=alice,
+    )
+    assert res.status_code == 200
+    assert res.json()["time_slot"] == "15.00-16.00"
+
+
+def test_user_cannot_update_others_booking(client):
+    alice = login(client, "alice", "alice123")
+    bob = login(client, "bob", "bob123")
+    booking = client.post(
+        "/api/bookings", json={"time_slot": "10.00-11.00"}, headers=alice
+    ).json()
+
+    res = client.put(
+        f"/api/bookings/{booking['id']}",
+        json={"time_slot": "15.00-16.00"},
+        headers=bob,
+    )
+    assert res.status_code == 403
+    unchanged = client.get("/api/bookings", headers=alice).json()
+    assert unchanged[0]["time_slot"] == "10.00-11.00"
+
+
+def test_admin_can_update_any_booking(client):
+    alice = login(client, "alice", "alice123")
+    admin = login(client, "admin", "admin123")
+    booking = client.post(
+        "/api/bookings", json={"time_slot": "10.00-11.00"}, headers=alice
+    ).json()
+
+    res = client.put(
+        f"/api/bookings/{booking['id']}",
+        json={"time_slot": "15.00-16.00"},
+        headers=admin,
+    )
+    assert res.status_code == 200
+    body = res.json()
+    assert body["time_slot"] == "15.00-16.00"
+    assert body["username"] == "alice"
+
+
 def test_empty_time_slot_rejected(client):
     alice = login(client, "alice", "alice123")
     res = client.post("/api/bookings", json={"time_slot": "   "}, headers=alice)

@@ -1,3 +1,4 @@
+import re
 from typing import Annotated
 
 from fastapi import APIRouter, Form, Request, Response
@@ -98,13 +99,38 @@ def bookings_page(request: Request, session: SessionDep, user: OptionalUser):
 
 
 def booking_list_fragment(
-    request: Request, session: Session, user: User, error: str | None = None
+    request: Request,
+    session: Session,
+    user: User,
+    error: str | None = None,
+    edit: dict | None = None,
 ):
     return templates.TemplateResponse(
         request,
         partial("booking_list"),
-        {"user": user, "bookings": visible_bookings(session, user), "error": error},
+        {
+            "user": user,
+            "bookings": visible_bookings(session, user),
+            "error": error,
+            "edit": edit,
+        },
     )
+
+
+def parse_slot(time_slot: str) -> tuple[str, str]:
+    """Split a stored slot into HH:MM values for <input type="time">.
+
+    Slots created by the web form are "HH:MM-HH:MM"; older seed data may
+    use "HH.MM" or free text — unparseable parts come back empty and the
+    inputs just start blank.
+    """
+    start, sep, end = time_slot.partition("-")
+
+    def norm(value: str) -> str:
+        value = value.strip().replace(".", ":")
+        return value if re.fullmatch(r"\d{1,2}:\d{2}", value) else ""
+
+    return (norm(start), norm(end)) if sep else ("", "")
 
 
 @router.post("/bookings", response_class=HTMLResponse)
@@ -128,6 +154,60 @@ def create_booking_fragment(
         session.add(Booking(user_id=user.id, time_slot=f"{start_time}-{end_time}"))
         session.commit()
     return booking_list_fragment(request, session, user, error)
+
+
+@router.get("/bookings/list", response_class=HTMLResponse)
+def booking_list_only(request: Request, session: SessionDep, user: OptionalUser):
+    """Plain list fragment — used by the edit form's cancel button."""
+    if user is None:
+        return redirect_to(request, "/login")
+    return booking_list_fragment(request, session, user)
+
+
+@router.get("/bookings/{booking_id}/edit", response_class=HTMLResponse)
+def edit_booking_fragment(
+    request: Request, booking_id: int, session: SessionDep, user: OptionalUser
+):
+    if user is None:
+        return redirect_to(request, "/login")
+    booking = session.get(Booking, booking_id)
+    if booking is None or not (user.is_admin or booking.user_id == user.id):
+        return booking_list_fragment(request, session, user)
+    start, end = parse_slot(booking.time_slot)
+    return booking_list_fragment(
+        request, session, user, edit={"id": booking.id, "start": start, "end": end}
+    )
+
+
+@router.put("/bookings/{booking_id}", response_class=HTMLResponse)
+def update_booking_fragment(
+    request: Request,
+    booking_id: int,
+    session: SessionDep,
+    user: OptionalUser,
+    start_time: Annotated[str, Form()],
+    end_time: Annotated[str, Form()],
+):
+    if user is None:
+        return redirect_to(request, "/login")
+    booking = session.get(Booking, booking_id)
+    if booking is None or not (user.is_admin or booking.user_id == user.id):
+        return booking_list_fragment(
+            request, session, user, error="ไม่พบการจองหรือไม่มีสิทธิ์แก้ไข"
+        )
+    error = None
+    edit = None
+    if not start_time or not end_time:
+        error = "กรุณาเลือกเวลาเริ่มต้นและสิ้นสุด"
+        edit = {"id": booking.id, "start": start_time, "end": end_time}
+    elif end_time <= start_time:
+        error = "เวลาสิ้นสุดต้องอยู่หลังเวลาเริ่มต้น"
+        edit = {"id": booking.id, "start": start_time, "end": end_time}
+    else:
+        booking.time_slot = f"{start_time}-{end_time}"
+        session.add(booking)
+        session.commit()
+    return booking_list_fragment(request, session, user, error, edit)
 
 
 @router.delete("/bookings/{booking_id}", response_class=HTMLResponse)

@@ -170,6 +170,27 @@ pre {
   justify-content: center;
 }
 
+.item-list .actions {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.item-list form.edit-form {
+  flex: 1;
+}
+
+button.ghost {
+  background: #fff;
+  color: #1a56db;
+  border: 1px solid #b5cdf7;
+  padding: 0.3rem 0.75rem;
+  font-size: 0.85rem;
+}
+
+button.ghost:hover {
+  background: #eef4fe;
+}
+
 button.danger {
   background: #fff;
   color: #d64545;

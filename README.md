@@ -45,6 +45,12 @@ curl -X POST http://127.0.0.1:8000/api/bookings \
 # ดูการจอง (admin เห็นทั้งหมด, ผู้ใช้ทั่วไปเห็นเฉพาะของตัวเอง)
 curl http://127.0.0.1:8000/api/bookings -H "Authorization: Bearer $TOKEN"
 
+# แก้ไขการจอง (เจ้าของหรือ admin เท่านั้น)
+curl -X PUT http://127.0.0.1:8000/api/bookings/1 \
+  -H "Authorization: Bearer $TOKEN" \
+  -H 'Content-Type: application/json' \
+  -d '{"time_slot":"15.00-16.00"}'
+
 # ยกเลิกการจอง (เจ้าของหรือ admin เท่านั้น)
 curl -X DELETE http://127.0.0.1:8000/api/bookings/1 -H "Authorization: Bearer $TOKEN"
 ```
@@ -58,7 +64,7 @@ uv run pytest
 ```
 
 ครอบคลุม: login สำเร็จ/ล้มเหลว, ต้อง login ก่อนใช้ bookings, ผู้ใช้เห็นเฉพาะของตัวเอง,
-admin เห็นทั้งหมด, สิทธิ์การลบ (เจ้าของ/admin ลบได้, คนอื่นโดน 403)
+admin เห็นทั้งหมด, สิทธิ์การแก้ไขและลบ (เจ้าของ/admin ทำได้, คนอื่นโดน 403)
 
 ## โครงสร้าง
 

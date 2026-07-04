@@ -126,6 +126,30 @@ def create_booking(body: BookingCreate, user: CurrentUser, session: SessionDep):
     )
 
 
+@router.put("/bookings/{booking_id}", response_model=BookingOut)
+def update_booking(
+    booking_id: int, body: BookingCreate, user: CurrentUser, session: SessionDep
+):
+    booking = session.get(Booking, booking_id)
+    if booking is None:
+        raise HTTPException(status_code=404, detail="Booking not found")
+    if not user.is_admin and booking.user_id != user.id:
+        raise HTTPException(
+            status_code=403, detail="Not allowed to update this booking"
+        )
+    slot = body.time_slot.strip()
+    if not slot:
+        raise HTTPException(status_code=422, detail="time_slot must not be empty")
+    booking.time_slot = slot
+    session.add(booking)
+    session.commit()
+    session.refresh(booking)
+    owner = session.get(User, booking.user_id)
+    return BookingOut(
+        id=booking.id, time_slot=booking.time_slot, username=owner.username
+    )
+
+
 @router.delete("/bookings/{booking_id}")
 def delete_booking(booking_id: int, user: CurrentUser, session: SessionDep):
     booking = session.get(Booking, booking_id)
